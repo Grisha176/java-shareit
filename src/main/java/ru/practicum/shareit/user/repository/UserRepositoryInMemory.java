@@ -13,7 +13,6 @@ public class UserRepositoryInMemory implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
 
-
     @Override
     public List<User> getAllUsers() {
         return users.values().stream().toList();
