@@ -1,19 +1,19 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.user.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class ItemDto {
+public class UserDto {
 
     @NotNull(message = "id не может быть пустым")
     private Long id;
     @NotNull(message = "имя не может быть пустым")
     private String name;
-    @NotNull(message = "описание не может быть пустым")
-    private String description;
-    @NotNull
-    private boolean available;
+    @Email
+    @NotNull(message = "email не может быть пустым")
+    private String email;
 }
