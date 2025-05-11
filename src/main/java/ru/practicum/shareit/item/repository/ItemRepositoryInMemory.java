@@ -4,11 +4,13 @@ import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class ItemRepositoryInMemory implements ItemRepository {
 
     private final Map<Long, Item> items = new HashMap<>();
+    private final AtomicLong idCounter = new AtomicLong(0);
 
     @Override
     public Item createItem(Item item) {
@@ -39,7 +41,7 @@ public class ItemRepositoryInMemory implements ItemRepository {
     }
 
     private Long generatedId() {
-        return (long) (items.size() + 1);
+        return idCounter.incrementAndGet();
     }
 
 }

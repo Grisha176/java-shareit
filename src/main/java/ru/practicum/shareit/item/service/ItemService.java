@@ -8,7 +8,7 @@ import java.util.Collection;
 
 public interface ItemService {
 
-    ItemDto createItem(Long userId, Item item);
+    ItemDto createItem(Long userId, ItemDto item);
 
     void deleteItem(Long itemId);
 

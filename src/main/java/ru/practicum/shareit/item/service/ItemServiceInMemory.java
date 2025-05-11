@@ -28,9 +28,10 @@ public class ItemServiceInMemory implements ItemService {
 
 
     @Override
-    public ItemDto createItem(Long userId, Item item) {
+    public ItemDto createItem(Long userId, ItemDto itemDto) {
         User user = userRepository.getUserById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
-        item.setOwnerId(userId);
+        itemDto.setOwnerId(userId);
+        Item item = ItemMapper.mapToItem(itemDto);
         item = itemRepository.createItem(item);
         return ItemMapper.mapToItemDto(item);
     }
@@ -71,7 +72,7 @@ public class ItemServiceInMemory implements ItemService {
                 .filter(item ->
                         item.getName().toLowerCase().contains(searchText) ||
                                 item.getDescription().toLowerCase().contains(searchText))
-                .filter(item -> item.getAvailable().equals(Boolean.TRUE))
+                .filter(Item::isAvailable)
                 .map(ItemMapper::mapToItemDto)
                 .toList();
     }

@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,9 +36,24 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidValidate(MethodArgumentNotValidException e) {
-        log.warn("Ошибка валидации данных," + e.getMessage());
+        log.warn("Ошибка валидации данных " + e.getMessage());
         return new ErrorResponse("Ошибка валидации данных");
     }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidValidate(ConstraintViolationException e) {
+        log.warn("Ошибка валидации данных " + e.getMessage());
+        return new ErrorResponse("Ошибка валидации данных");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ErrorResponse handleInvalidValidate(Exception e) {
+        log.warn("Ошибка сервера " + e.getMessage());
+        return new ErrorResponse("Ошибка сервера");
+    }
+
 
 }
 

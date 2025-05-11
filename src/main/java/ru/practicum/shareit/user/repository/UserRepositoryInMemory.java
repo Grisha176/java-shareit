@@ -7,11 +7,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class UserRepositoryInMemory implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
+    private final AtomicLong idCounter = new AtomicLong(0);
 
     @Override
     public List<User> getAllUsers() {
@@ -42,7 +44,7 @@ public class UserRepositoryInMemory implements UserRepository {
     }
 
     private Long generatedId() {
-        return (long) (users.size() + 1);
+        return idCounter.incrementAndGet();
     }
 
     @Override
