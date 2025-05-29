@@ -119,8 +119,6 @@
 							<phase>compile</phase>
 						</execution>
 					</executions>
-					<dependencies>
-					</dependencies>
 				</plugin>
 
 				<plugin>
