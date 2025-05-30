@@ -22,37 +22,37 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Collection<UserDto> getAllUsers() {
-        return userRepository.getAllUsers().stream().map(user -> UserMapper.mapToDto(user)).toList();
+        return userRepository.findAll().stream().map(UserMapper::mapToDto).toList();
     }
 
     @Override
     public UserDto getUserById(Long userId) {
-        return UserMapper.mapToDto(userRepository.getUserById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден")));
+        return UserMapper.mapToDto(userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден")));
     }
 
     @Override
     public UserDto createUser(NewUserRequest user) {
         User newUser = UserMapper.mapToUser(user);
-        if (userRepository.getAllUsers().contains(user) || userRepository.hasUserWithEmail(user.getEmail())) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             throw new DuplicatedException("Пользователь: " + user + " уже зарегистрирован");
         }
-        newUser = userRepository.createUser(newUser);
+        newUser = userRepository.save(newUser);
         return UserMapper.mapToDto(newUser);
     }
 
     @Override
     public UserDto updateUser(Long userId, UpdatedUserRequest updatedUser) {
-        User user = userRepository.getUserById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
-        if (userRepository.hasUserWithEmail(updatedUser.getEmail()) && !updatedUser.getEmail().equals(user.getEmail())) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
+        if (userRepository.existsByEmail(updatedUser.getEmail()) && !updatedUser.getEmail().equals(user.getEmail())) {
             throw new DuplicatedException("Пользователь с email: " + updatedUser.getEmail() + " уже зарегистрирован");
         }
         user = UserMapper.updateUserFields(user, updatedUser);
-        user = userRepository.updateUser(user);
+        user = userRepository.save(user);
         return UserMapper.mapToDto(user);
     }
 
     @Override
     public void deleteUser(Long userId) {
-        userRepository.deleteUser(userId);
+        userRepository.deleteById(userId);
     }
 }
