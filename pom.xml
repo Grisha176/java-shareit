@@ -16,7 +16,7 @@
 	<name>ShareIt</name>
 
 	<properties>
-		<java.version>17</java.version>
+		<java.version>23</java.version>
 	</properties>
 
 	<dependencies>
@@ -72,13 +72,9 @@
 	</dependencies>
 
 	<build>
-		<resources>
-			<resource>
-				<directory>src/main/resources</directory>
-				<filtering>true</filtering>
-			</resource>
-		</resources>
+
 		<plugins>
+		<!-- Компилятор с аннотационным процессором Lombok -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
@@ -91,7 +87,29 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+
+			<plugin>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<configuration>
+				<annotationProcessors>
+					<processor>lombok.launch.AnnotationProcessorHider$AnnotationProcessor</processor>
+				</annotationProcessors>
+				<source>23</source>
+				<target>23</target>
+			</configuration>
+		</plugin>
+
 		</plugins>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
+
 		<pluginManagement>
 			<plugins>
 				<plugin>
@@ -121,6 +139,13 @@
 							<phase>compile</phase>
 						</execution>
 					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>com.puppycrawl.tools</groupId>
+							<artifactId>checkstyle</artifactId>
+							<version>10.3</version>
+						</dependency>
+					</dependencies>
 				</plugin>
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
