@@ -19,7 +19,7 @@ public interface ItemService {
 
     Collection<ItemDto> getAllItems(Long userId);
 
-    ItemDto getItemById(Long itemId);
+    ItemDto getItemById(Long userId,Long itemId);
 
     Collection<ItemDto> search(String text);
 

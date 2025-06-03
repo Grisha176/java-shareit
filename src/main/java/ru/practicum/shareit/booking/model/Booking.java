@@ -30,7 +30,7 @@ public class Booking {
     private LocalDateTime endTime;
     @ManyToOne
     @JoinColumn(name = "booker_id", referencedColumnName = "user_id", nullable = false)
-    private User broker;
+    private User booker;
     @ManyToOne
     @JoinColumn(name = "item_id", referencedColumnName = "item_id", nullable = false)
     private Item item;

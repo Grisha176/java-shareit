@@ -1,6 +1,7 @@
 package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.DuplicatedException;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -15,6 +16,7 @@ import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
@@ -37,6 +39,7 @@ public class UserServiceImpl implements UserService {
             throw new DuplicatedException("Пользователь: " + user + " уже зарегистрирован");
         }
         newUser = userRepository.save(newUser);
+        log.info("Добавление пользователя с id: {}",newUser.getId());
         return UserMapper.mapToDto(newUser);
     }
 
@@ -48,6 +51,7 @@ public class UserServiceImpl implements UserService {
         }
         user = UserMapper.updateUserFields(user, updatedUser);
         user = userRepository.save(user);
+        log.info("Обновелние пользователя с id:{}",userId);
         return UserMapper.mapToDto(user);
     }
 

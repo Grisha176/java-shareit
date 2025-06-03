@@ -16,15 +16,15 @@ import java.util.Optional;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
-    List<Booking> findAllByBrokerId(Long userId);
+    List<Booking> findAllByBookerId(Long userId);
 
-    List<Booking> findAllByBrokerIdAndStartTimeIsBeforeAndEndTimeIsBefore(Long userId, LocalDateTime now, LocalDateTime now2);
+    List<Booking> findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsBefore(Long userId, LocalDateTime now, LocalDateTime now2);
 
-    List<Booking> findAllByBrokerIdAndEndTimeIsBefore(Long userId, LocalDateTime now);
+    List<Booking> findAllByBookerIdAndEndTimeIsBefore(Long userId, LocalDateTime now);
 
-    List<Booking> findAllByBrokerIdAndStartTimeIsAfter(Long userId, LocalDateTime now);
+    List<Booking> findAllByBookerIdAndStartTimeIsAfter(Long userId, LocalDateTime now);
 
-    List<Booking> findAllByBrokerIdAndStatus(Long userId, BookingStatus status);
+    List<Booking> findAllByBookerIdAndStatus(Long userId, BookingStatus status);
 
     List<Booking> findAllByItemOwnerId(Long userId);
 
@@ -36,18 +36,17 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     List<Booking> findAllByItemOwnerIdAndStatus(Long userId, BookingStatus status);
 
-    Booking findByItemAndBroker(Item item, User user);
-
-    boolean existsByItemAndStatus(Item item, BookingStatus status);
-
-    boolean existsByItemAndStartTimeIsBeforeAndEndTimeIsAfter(Item item, LocalDateTime time, LocalDateTime time2);
-
-    @Query("SELECT b FROM Booking b WHERE b.item = :item AND b.endTime < CURRENT_TIMESTAMP AND b.status = 'APPROVED' ORDER BY b.endTime DESC")
+    @Query("SELECT b FROM Booking b WHERE b.item = :item AND b.startTime < CURRENT_TIMESTAMP AND b.status = 'APPROVED' ORDER BY b.startTime DESC LIMIT 1")
     Optional<Booking> findLastFinishedBookingByItem(@Param("item") Item item);
 
     // Следующее будущее бронирование
     @Query("SELECT b FROM Booking b WHERE b.item = :item AND b.startTime > CURRENT_TIMESTAMP AND b.status = 'APPROVED' ORDER BY b.startTime ASC")
     Optional<Booking> findNextBookingByItem(@Param("item") Item item);
+
+    @Query(value = "SELECT b.* FROM bookings as b " +
+            "JOIN items as i ON i.item_id = b.item_id " +
+            "WHERE b.booker_id = ?1 AND i.item_id = ?2 AND b.status = 'APPROVED' AND b.end_time < ?3 ", nativeQuery = true)
+    List<Booking> findAllByUserBookings(Long userId, Long itemId, LocalDateTime now);
 
 
 }
