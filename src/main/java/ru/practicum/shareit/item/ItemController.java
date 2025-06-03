@@ -23,45 +23,45 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDto> getAllItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        log.info("Запрос на получение всех вещей с userId: {}",userId);
+        log.info("Запрос на получение всех вещей с userId: {}", userId);
         return itemService.getAllItems(userId).stream().toList();
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId,@PathVariable("itemId") Long id) {
-        log.info("Получение вещи с id: {},пользователем: {}",id,userId);
-        return itemService.getItemById(userId,id);
+    public ItemDto getItemById(@RequestHeader("X-Sharer-User-Id") Long userId, @PathVariable("itemId") Long id) {
+        log.info("Получение вещи с id: {},пользователем: {}", id, userId);
+        return itemService.getItemById(userId, id);
     }
 
     @GetMapping("/search")
     public List<ItemDto> search(@RequestParam String text) {
-        log.info("Запрос на поиск вещи по тексту {}",text);
+        log.info("Запрос на поиск вещи по тексту {}", text);
         return itemService.search(text).stream().toList();
     }
 
     @PostMapping
     public ItemDto createItem(@RequestHeader("X-Sharer-User-Id") Long userId, @Valid @RequestBody ItemDto itemDto) {
-        log.info("Запос на создание вещи: {},пользователем: {}",itemDto,userId);
+        log.info("Запос на создание вещи: {},пользователем: {}", itemDto, userId);
         return itemService.createItem(userId, itemDto);
     }
 
     @PostMapping("/{itemId}/comment")
     public CommentDto addComment(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId, @Valid @RequestBody CommentDto commentDto) {
-        log.info("Запрос на добавление комментария вещи: {},пользователем с id: {}",itemId,userId);
+        log.info("Запрос на добавление комментария вещи: {},пользователем с id: {}", itemId, userId);
         commentDto.setItemId(itemId);
         return itemService.addComment(userId, commentDto);
     }
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") Long userId, @Valid @RequestBody UpdateItemRequest itemRequest, @PathVariable Long itemId) {
-        log.info("Запрос на обновление вещи с id: {}",itemId);
+        log.info("Запрос на обновление вещи с id: {}", itemId);
         return itemService.updateItem(itemId, userId, itemRequest);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteItem(@PathVariable Long id) {
         itemService.deleteItem(id);
-        log.info("Удаление вещи с id: {}",id);
+        log.info("Удаление вещи с id: {}", id);
         return new ResponseEntity<>("{ \"Удаление прошло успешно!\" }", HttpStatus.OK);
     }
 

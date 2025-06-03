@@ -37,7 +37,7 @@ public class BookingMapper {
                 .build();
     }
 
-    public static Booking mapToBooking(NewBookingRequest request,Item item, User user){
+    public static Booking mapToBooking(NewBookingRequest request, Item item, User user) {
         return Booking.builder()
                 .startTime(request.getStart())
                 .endTime(request.getEnd())

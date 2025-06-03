@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
             throw new DuplicatedException("Пользователь: " + user + " уже зарегистрирован");
         }
         newUser = userRepository.save(newUser);
-        log.info("Добавление пользователя с id: {}",newUser.getId());
+        log.info("Добавление пользователя с id: {}", newUser.getId());
         return UserMapper.mapToDto(newUser);
     }
 
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
         }
         user = UserMapper.updateUserFields(user, updatedUser);
         user = userRepository.save(user);
-        log.info("Обновелние пользователя с id:{}",userId);
+        log.info("Обновелние пользователя с id:{}", userId);
         return UserMapper.mapToDto(user);
     }
 

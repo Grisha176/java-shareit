@@ -4,11 +4,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.booking.mappers.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exception.AccessException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.Comment;
@@ -23,10 +21,8 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +44,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         Item item = ItemMapper.mapToItem(itemDto);
         item.setOwner(user);
         item = itemRepository.save(item);
-        log.info("Создание вещи с id: {}",item.getId());
+        log.info("Создание вещи с id: {}", item.getId());
         return mapToDto(item);
     }
 
@@ -63,7 +59,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Сущность с id:" + itemId + " не найдена"));
         item = ItemMapper.updateItemFields(item, updatedItem);
         item = itemRepository.save(item);
-        log.info("Обновление вещи с id: {}",itemId);
+        log.info("Обновление вещи с id: {}", itemId);
         return mapToDto(item);
     }
 
@@ -75,12 +71,12 @@ public class ItemServiceInMemoryImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto getItemById(Long userId,Long itemId) {
+    public ItemDto getItemById(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Сущность с id:" + itemId + " не найдена"));
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
         ItemDto itemDto = ItemMapper.mapToItemDto(item);
         itemDto.setComments(commentRepository.findAllByItem(item).stream().map(CommentMapper::mapToDto).toList());
-        if(item.getOwner().getId().equals(userId)){
+        if (item.getOwner().getId().equals(userId)) {
             itemDto = mapToDto(item);
         }
         return itemDto;
@@ -112,7 +108,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         comment = commentRepository.save(comment);
         commentDto = CommentMapper.mapToDto(comment);
         commentDto.setItemId(comment.getItem().getId());
-        log.info("Добавление комментария с id: {}",commentDto.getId());
+        log.info("Добавление комментария с id: {}", commentDto.getId());
         return commentDto;
     }
 
