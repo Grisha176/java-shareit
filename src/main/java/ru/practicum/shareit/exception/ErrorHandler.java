@@ -15,7 +15,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundException(NotFoundException e) {
-        log.warn("Обьект не найден");
+        log.warn("Обьект не найден " + e.getMessage());
         return new ErrorResponse("Объект не найден");
     }
 
@@ -29,7 +29,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidateException(ValidationException e) {
-        log.warn("Ошибка при валидации");
+        log.warn("Ошибка при валидации " + e.getMessage());
         return new ErrorResponse("Ошибка валидации,проверьте корректность данных");
     }
 
@@ -52,6 +52,13 @@ public class ErrorHandler {
     public ErrorResponse handleInvalidValidate(Exception e) {
         log.warn("Ошибка сервера " + e.getMessage());
         return new ErrorResponse("Ошибка сервера");
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleAccessException(AccessException e) {
+        log.warn("Ошибка  " + e.getMessage());
+        return new ErrorResponse("Данная вещь арендуется");
     }
 
 

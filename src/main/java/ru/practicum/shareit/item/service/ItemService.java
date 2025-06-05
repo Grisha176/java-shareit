@@ -1,11 +1,14 @@
 package ru.practicum.shareit.item.service;
 
+import org.springframework.stereotype.Service;
+import ru.practicum.shareit.item.comment.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
-import ru.practicum.shareit.item.model.Item;
+
 
 import java.util.Collection;
 
+@Service
 public interface ItemService {
 
     ItemDto createItem(Long userId, ItemDto item);
@@ -16,8 +19,10 @@ public interface ItemService {
 
     Collection<ItemDto> getAllItems(Long userId);
 
-    ItemDto getItemById(Long itemId);
+    ItemDto getItemById(Long userId,Long itemId);
 
     Collection<ItemDto> search(String text);
+
+    CommentDto addComment(Long userId, CommentDto commentDto);
 
 }
