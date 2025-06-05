@@ -15,7 +15,7 @@ import ru.practicum.shareit.item.comment.CommentMapper;
 import ru.practicum.shareit.item.comment.CommentRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemRequest;
-import ru.practicum.shareit.item.mappers.ItemMapper;
+import ru.practicum.shareit.mappers.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -35,46 +35,48 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
+    private final ItemMapper mapper;
 
 
+    @Transactional
     @Override
     public ItemDto createItem(Long userId, ItemDto itemDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
         itemDto.setOwnerId(userId);
-        Item item = ItemMapper.mapToItem(itemDto);
+        Item item = mapper.mapToItem(itemDto);
         item.setOwner(user);
         item = itemRepository.save(item);
         log.info("Создание вещи с id: {}", item.getId());
         return mapToDto(item);
     }
 
+    @Transactional
     @Override
     public void deleteItem(Long itemId) {
         itemRepository.deleteById(itemId);
     }
 
+    @Transactional
     @Override
     public ItemDto updateItem(Long itemId, Long userId, UpdateItemRequest updatedItem) {
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Сущность с id:" + itemId + " не найдена"));
-        item = ItemMapper.updateItemFields(item, updatedItem);
+        item = updateItemFields(item, updatedItem);
         item = itemRepository.save(item);
         log.info("Обновление вещи с id: {}", itemId);
         return mapToDto(item);
     }
 
-    @Transactional
     @Override
     public Collection<ItemDto> getAllItems(Long userId) {
         return itemRepository.findItemByOwnerId(userId).stream().map(this::mapToDto).toList();
     }
 
-    @Transactional
     @Override
     public ItemDto getItemById(Long userId, Long itemId) {
         Item item = itemRepository.findById(itemId).orElseThrow(() -> new NotFoundException("Сущность с id:" + itemId + " не найдена"));
         userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
-        ItemDto itemDto = ItemMapper.mapToItemDto(item);
+        ItemDto itemDto = mapper.mapToItemDto(item);
         itemDto.setComments(commentRepository.findAllByItem(item).stream().map(CommentMapper::mapToDto).toList());
         if (item.getOwner().getId().equals(userId)) {
             itemDto = mapToDto(item);
@@ -82,7 +84,6 @@ public class ItemServiceInMemoryImpl implements ItemService {
         return itemDto;
     }
 
-    @Transactional
     @Override
     public Collection<ItemDto> search(String text) {
         if (text == null || text.isBlank()) {
@@ -93,6 +94,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
                 .toList();
     }
 
+    @Transactional
     @Override
     public CommentDto addComment(Long userId, CommentDto commentDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
@@ -113,7 +115,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     }
 
     private ItemDto mapToDto(Item item) {
-        ItemDto itemDto = ItemMapper.mapToItemDto(item);
+        ItemDto itemDto = mapper.mapToItemDto(item);
         itemDto.setComments(commentRepository.findAllByItem(item).stream().map(CommentMapper::mapToDto).toList());
         Optional<Booking> lastBooking = bookingRepository.findLastFinishedBookingByItem(item);
         Optional<Booking> nextBooking = bookingRepository.findNextBookingByItem(item);
@@ -122,6 +124,19 @@ public class ItemServiceInMemoryImpl implements ItemService {
         nextBooking.ifPresent(b -> itemDto.setNextBooking(BookingMapper.mapToDto(b)));
 
         return itemDto;
+    }
+    private static Item updateItemFields(Item item, UpdateItemRequest updateItemRequest) {
+
+        if (updateItemRequest.hasName()) {
+            item.setName(updateItemRequest.getName());
+        }
+        if (updateItemRequest.hasDescription()) {
+            item.setDescription(updateItemRequest.getDescription());
+        }
+        if (updateItemRequest.hasAvailable()) {
+            item.setAvailable(updateItemRequest.getAvailable());
+        }
+        return item;
     }
 
 }

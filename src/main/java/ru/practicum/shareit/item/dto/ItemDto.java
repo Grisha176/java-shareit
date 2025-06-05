@@ -19,6 +19,7 @@ public class ItemDto {
     private String name;
     @NotNull(message = "описание не может быть пустым")
     private String description;
+    @NotNull
     private Boolean available;
     private Long ownerId;
     private String request;

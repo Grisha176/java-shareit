@@ -1,14 +1,12 @@
 package ru.practicum.shareit.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 
 @Builder
-@Data
+@Getter
+@Setter
 @Table(name = "users")
 @AllArgsConstructor
 @NoArgsConstructor
