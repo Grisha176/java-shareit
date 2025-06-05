@@ -4,7 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.booking.mappers.BookingMapper;
+import ru.practicum.shareit.mappers.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -36,6 +36,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingRepository bookingRepository;
     private final ItemMapper mapper;
+    private final BookingMapper bookingMapper;
 
 
     @Transactional
@@ -120,11 +121,12 @@ public class ItemServiceInMemoryImpl implements ItemService {
         Optional<Booking> lastBooking = bookingRepository.findLastFinishedBookingByItem(item);
         Optional<Booking> nextBooking = bookingRepository.findNextBookingByItem(item);
 
-        lastBooking.ifPresent(b -> itemDto.setLastBooking(BookingMapper.mapToDto(b)));
-        nextBooking.ifPresent(b -> itemDto.setNextBooking(BookingMapper.mapToDto(b)));
+        lastBooking.ifPresent(b -> itemDto.setLastBooking(bookingMapper.mapToDto(b)));
+        nextBooking.ifPresent(b -> itemDto.setNextBooking(bookingMapper.mapToDto(b)));
 
         return itemDto;
     }
+
     private static Item updateItemFields(Item item, UpdateItemRequest updateItemRequest) {
 
         if (updateItemRequest.hasName()) {
