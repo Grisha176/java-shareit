@@ -69,7 +69,7 @@ class ItemServiceImplTest {
     void setUp() {
         owner = new User(1L, "John", "john@example.com");
         item = new Item(1L, "Drill", "A powerful drill", true, owner, null);
-        itemDto = new ItemDto(1L, "Drill", "A powerful drill", true, 1L, null, null, null, null, null);
+        itemDto = new ItemDto(1L, "Drill", "A powerful drill", true, 1L, null, null, null, null);
 
         comment = new Comment(1L, "Great item!", item, owner, LocalDateTime.now());
         commentDto = new CommentDto(1L, "Great item!", 1L, "John", LocalDateTime.now());
