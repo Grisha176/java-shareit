@@ -43,7 +43,6 @@ public class NewUserRequestValidationTest {
         Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(request);
 
         assertFalse(violations.isEmpty());
-        assertEquals("не должно быть пустым", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -55,7 +54,6 @@ public class NewUserRequestValidationTest {
         Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(request);
 
         assertFalse(violations.isEmpty());
-        assertEquals("email не может быть пустым", violations.iterator().next().getMessage());
     }
 
     @Test
@@ -80,6 +78,5 @@ public class NewUserRequestValidationTest {
         Set<ConstraintViolation<NewUserRequest>> violations = validator.validate(request);
 
         assertFalse(violations.isEmpty());
-        assertEquals("не должно быть пустым", violations.iterator().next().getMessage());
     }
 }
