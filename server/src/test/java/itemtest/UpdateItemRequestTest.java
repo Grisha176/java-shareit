@@ -204,5 +204,4 @@ class UpdateItemRequestTest {
         assertThat(result).extractingJsonPathValue("$.description").isNull();
         assertThat(result).extractingJsonPathValue("$.available").isNull();
     }
-
 }
