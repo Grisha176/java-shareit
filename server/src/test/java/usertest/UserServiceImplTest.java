@@ -134,7 +134,6 @@ class UserServiceImplTest {
     }
 
 
-
     // --- deleteUser ---
     @Test
     void shouldDeleteUser_whenExists() {

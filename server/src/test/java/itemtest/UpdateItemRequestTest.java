@@ -120,12 +120,7 @@ class UpdateItemRequestTest {
     @Test
     void deserialize_WithFullJson_ShouldSetAllFields() throws IOException {
         String content = """
-                {
-                    "name": "Saw",
-                    "description": "Hand saw",
-                    "available": false,
-                    "ownerId": 200
-                }
+                {  "name": "Saw",  "description": "Hand saw", "available": false,   "ownerId": 200 }
                 """;
 
         UpdateItemRequest dto = json.parseObject(content);
@@ -209,4 +204,5 @@ class UpdateItemRequestTest {
         assertThat(result).extractingJsonPathValue("$.description").isNull();
         assertThat(result).extractingJsonPathValue("$.available").isNull();
     }
+
 }
