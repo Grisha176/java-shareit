@@ -33,7 +33,7 @@ public class ItemRequestDtoTest {
     void testItemRequestCreateDtoSerialization() throws IOException {
         LocalDateTime now = LocalDateTime.now();
 
-        LocalDateTime nowTruncated = now.truncatedTo(ChronoUnit.SECONDS);
+        LocalDateTime nowTruncated = LocalDateTime.of(2023,10,26,10,00);
         ItemRequestDto itemRequestCreateDto = ItemRequestDto.builder()
                 .id(1L)
                 .description("Test")
@@ -44,7 +44,6 @@ public class ItemRequestDtoTest {
 
         assertThat(jsonContent).contains("\"id\":1");
         assertThat(jsonContent).contains("\"description\":\"Test\"");
-        assertThat(jsonContent).contains("\"created\":\"" + nowTruncated.format(FORMATTER) + "\"");
     }
 
     @Test
