@@ -130,20 +130,7 @@ public class ItemTest {
 
     @Test
     void deserializeFromJson_ShouldPreserveAllFields() throws IOException {
-        String content = """
-            {
-              "id": 101,
-              "name": "Saw",
-              "description": "Hand saw",
-              "available": false,
-              "owner": {
-                "id": 2,
-                "name": "Bob",
-                "email": "bob@example.com"
-              },
-              "requestId": 201
-            }
-        """;
+        String content = "{ \"id\": 101, \"name\": \"Saw\", \"description\": \"Hand saw\", \"available\": false, \"owner\": { \"id\": 2, \"name\": \"Bob\", \"email\": \"bob@example.com\" }, \"requestId\": 201 }";
 
         Item parsedItem = jacksonTester.parseObject(content);
 
