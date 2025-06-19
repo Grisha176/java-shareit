@@ -42,6 +42,7 @@ public class ItemRequestDtoTest {
 
         String jsonContent = itemRequestCreateDtoJacksonTester.write(itemRequestCreateDto).getJson();
 
+        assertThat(jsonContent);
         assertThat(jsonContent).contains("\"id\":1");
         assertThat(jsonContent).contains("\"description\":\"Test\"");
     }
