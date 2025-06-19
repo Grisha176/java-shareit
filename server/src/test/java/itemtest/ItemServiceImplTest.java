@@ -68,7 +68,7 @@ class ItemServiceImplTest {
     @BeforeEach
     void setUp() {
         owner = new User(1L, "John", "john@example.com");
-        item = new Item(1L, "Drill", "A powerful drill", true, owner, null, null);
+        item = new Item(1L, "Drill", "A powerful drill", true, owner, null);
         itemDto = new ItemDto(1L, "Drill", "A powerful drill", true, 1L, null, null, null, null, null);
 
         comment = new Comment(1L, "Great item!", item, owner, LocalDateTime.now());
@@ -79,7 +79,7 @@ class ItemServiceImplTest {
                 .start(LocalDateTime.of(2020, 12, 1, 12, 20))
                 .end(LocalDateTime.of(2020, 12, 2, 12, 20))
                 .status(BookingStatus.WAITING)
-                .item(new Item(1L, "Drill", "Powerful drill", true, null, "d", 2L))
+                .item(new Item(1L, "Drill", "Powerful drill", true, null, 2L))
                 .build();
     }
 

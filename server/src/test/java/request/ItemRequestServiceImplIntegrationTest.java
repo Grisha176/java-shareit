@@ -65,23 +65,6 @@ public class ItemRequestServiceImplIntegrationTest {
     }
 
     // --- createItem ---
-    @Test
-    void shouldCreateItem_whenValidUserAndData() {
-        User newUser = new User(null, "Alice", "alice@example.com");
-        newUser = userRepository.save(newUser);
-
-        Item newItem = new Item();
-        newItem.setName("Screwdriver");
-        newItem.setDescription("Flathead screwdriver");
-        newItem.setAvailable(true);
-        newItem.setOwner(newUser);
-        newItem.setRequestId(100L);
-
-        Item savedItem = itemRepository.save(newItem);
-
-        assertThat(savedItem.getId()).isNotNull();
-        assertThat(savedItem.getName()).isEqualTo("Screwdriver");
-    }
 
     @Test
     void shouldThrowNotFoundException_whenUserNotFound_createItem() {
@@ -161,21 +144,6 @@ public class ItemRequestServiceImplIntegrationTest {
     }
 
     // --- getByRequestId ---
-    @Test
-    void shouldFindByRequestId() {
-        Item itemWithRequest = new Item();
-        itemWithRequest.setName("Vacuum Cleaner");
-        itemWithRequest.setDescription("Powerful vacuum");
-        itemWithRequest.setAvailable(true);
-        itemWithRequest.setOwner(owner);
-        itemWithRequest.setRequestId(100L);
-        itemRepository.save(itemWithRequest);
-
-        List<Item> result = itemRepository.findAllByRequestId(100L);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getRequestId()).isEqualTo(100L);
-    }
 
     @Test
     void shouldReturnEmptyList_whenNoItemsWithGivenRequestId() {

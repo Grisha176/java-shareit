@@ -36,7 +36,7 @@ public class BookingDtoTest {
                 .end(LocalDateTime.of(2020, 12, 2, 12, 20))
                 .status(BookingStatus.WAITING)
                 .booker(user)
-                .item(new Item(1L, "Drill", "Powerful drill", true, user, "d", 2L))
+                .item(new Item(1L, "Drill", "Powerful drill", true, user, 2L))
                 .build();
     }
 
