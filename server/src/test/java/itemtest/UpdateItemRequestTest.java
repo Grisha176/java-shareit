@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @JsonTest
 @ContextConfiguration(classes = ru.practicum.shareit.ShareItApp.class)
-class UpdateItemRequestTest {
+class UpdateItemRequestTest  {
 
     @Autowired
     private JacksonTester<UpdateItemRequest> json;
@@ -28,7 +28,6 @@ class UpdateItemRequestTest {
         request = new UpdateItemRequest();
     }
 
-    // --- hasName() ---
 
     @Test
     void hasName_WhenNameIsNotNullAndNotBlank_ShouldReturnTrue() {
