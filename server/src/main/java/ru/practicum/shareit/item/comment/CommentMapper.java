@@ -1,19 +1,16 @@
 package ru.practicum.shareit.item.comment;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
-
 @Component
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
+
 public class CommentMapper {
 
     public CommentDto mapToDto(Comment comment) {
         return CommentDto.builder()
                 .id(comment.getId())
                 .text(comment.getComment())
-                .itemId(comment.getItem().getId())
-                .authorName(comment.getAuthor().getName())
+                .itemId((comment.getItem() != null) ? comment.getItem().getId() : null)
+                .authorName((comment.getAuthor() != null) ? comment.getAuthor().getName() : null)
                 .created(comment.getCreated())
                 .build();
     }
@@ -22,6 +19,7 @@ public class CommentMapper {
         return Comment.builder()
                 .id(dto.getId())
                 .comment(dto.getText())
+                .created(dto.getCreated())
                 .build();
     }
 }
