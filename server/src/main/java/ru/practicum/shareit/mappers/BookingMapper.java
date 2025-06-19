@@ -1,5 +1,6 @@
 package ru.practicum.shareit.mappers;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.springframework.data.repository.query.Param;
@@ -12,10 +13,12 @@ import ru.practicum.shareit.user.User;
 @Mapper(componentModel = "spring")
 public interface BookingMapper {
 
+    @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "start", source = "startTime")
     @Mapping(target = "end", source = "endTime")
     BookingDto mapToDto(Booking booking);
 
+    @BeanMapping(ignoreByDefault = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "startTime", source = "request.start")
     @Mapping(target = "endTime", source = "request.end")
