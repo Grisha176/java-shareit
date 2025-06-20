@@ -21,7 +21,6 @@ public class BookingMapperTest {
     private final BookingMapper bookingMapper = new BookingMapperImpl();
 
 
-
     private final LocalDateTime now = LocalDateTime.now();
 
     @Test
@@ -32,6 +31,7 @@ public class BookingMapperTest {
         // Then
         assertNull(result);
     }
+
     @Test
     void mapToBooking() {
 
