@@ -3,6 +3,7 @@ package ru.practirum.shareit.user;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +18,7 @@ import ru.practirum.shareit.user.dto.UpdateUserRequest;
 @Slf4j
 public class UserController {
 
+    @Autowired
     private final UserClient userClient;
 
     @GetMapping("/users")
