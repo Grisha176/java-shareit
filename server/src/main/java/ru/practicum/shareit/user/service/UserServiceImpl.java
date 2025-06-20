@@ -50,9 +50,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(Long userId, UpdatedUserRequest updatedUser) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
-        if (userRepository.existsByEmail(updatedUser.getEmail()) && !updatedUser.getEmail().equals(user.getEmail())) {
-            throw new DuplicatedException("Пользователь с email: " + updatedUser.getEmail() + " уже зарегистрирован");
+        if(!user.getEmail().equals(updatedUser.getEmail())){
+            if (userRepository.existsByEmail(updatedUser.getEmail()) && !updatedUser.getEmail().equals(user.getEmail())) {
+                throw new DuplicatedException("Пользователь с email: " + updatedUser.getEmail() + " уже зарегистрирован");
+            }
         }
+
         user = updateUserFields(user, updatedUser);
         user = userRepository.save(user);
         log.info("Обновелние пользователя с id:{}", userId);

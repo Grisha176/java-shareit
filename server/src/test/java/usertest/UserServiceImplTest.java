@@ -22,6 +22,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +42,7 @@ class UserServiceImplTest {
     private final String email = "john@example.com";
     private final String updatedEmail = "john_new@example.com";
     private final String name = "John";
+    private User existingUser;
 
     private User user;
     private NewUserRequest newUserRequest;
@@ -49,6 +51,12 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
+        // Создаем существующего пользователя
+        existingUser = new User();
+        existingUser.setId(1L);
+        existingUser.setName("Alice");
+        existingUser.setEmail("alice@example.com");
+
         user = new User(userId, name, email);
         newUserRequest = new NewUserRequest("Alice", "alice@example.com");
         updatedUserRequest = new UpdatedUserRequest("Alice Updated", "alice_new@example.com");
@@ -154,6 +162,278 @@ class UserServiceImplTest {
         assertThat(result.getId()).isEqualTo(user.getId());
         assertThat(result.getName()).isEqualTo(user.getName());
         assertThat(result.getEmail()).isEqualTo(user.getEmail());
+    }
+
+    @Test
+    void updateUser_WhenValidData_ShouldUpdateNameAndEmail() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setName("Bob");
+        request.setEmail("bob@example.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Bob", result.getName());
+        assertEquals("bob@example.com", result.getEmail());
+
+        verify(userRepository).save(argThat(u -> u.getName().equals("Bob") && u.getEmail().equals("bob@example.com")));
+    }
+
+    @Test
+    void updateUser_WhenOnlyNameProvided_ShouldUpdateNameOnly() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setName("New Name");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        assertEquals(existingUser.getEmail(), result.getEmail());
+        verify(userRepository).save(argThat(u -> u.getName().equals("New Name")));
+    }
+
+    @Test
+    void updateUser_WhenOnlyEmailProvided_ShouldUpdateEmail() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setEmail("new@email.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail("new@email.com")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("new@email.com", result.getEmail());
+        verify(userRepository).save(argThat(u -> u.getEmail().equals("new@email.com")));
+    }
+
+    @Test
+    void updateUser_WhenEmailIsAlreadyTaken_ShouldThrowDuplicatedException() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setEmail("taken@example.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail("taken@example.com")).thenReturn(true);
+
+        // When + Then
+        DuplicatedException exception = assertThrows(DuplicatedException.class,
+                () -> userService.updateUser(1L, request));
+
+        assertTrue(exception.getMessage().contains("уже зарегистрирован"));
+    }
+
+    @Test
+    void updateUser_WhenUserNotFound_ShouldThrowNotFoundException() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setName("NotExistingUser");
+
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When + Then
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> userService.updateUser(999L, request));
+
+        assertTrue(exception.getMessage().contains("не найден"));
+    }
+
+    @Test
+    void updateUser_WhenNoUpdatesProvided_ShouldReturnSameUser() {
+        // Given
+        UpdatedUserRequest emptyRequest = new UpdatedUserRequest();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userMapper.mapToDto(any())).thenReturn(UserDto.builder()
+                .id(existingUser.getId())
+                .name(existingUser.getName())
+                .email(existingUser.getEmail())
+                .build());
+        when(userRepository.existsByEmail(any())).thenReturn(false);
+
+        // When
+        UserDto result = userService.updateUser(1L, emptyRequest);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(existingUser.getName(), result.getName());
+        assertEquals(existingUser.getEmail(), result.getEmail());
+        verify(userRepository).findById(1L);
+    }
+
+    @Test
+    void updateUser_WhenEmailIsTheSame_ShouldNotCheckDuplicates() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setEmail("alice@example.com"); // тот же email
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenReturn(existingUser);
+        when(userMapper.mapToDto(existingUser)).thenReturn(UserDto.builder()
+                .id(existingUser.getId())
+                .name(existingUser.getName())
+                .email(existingUser.getEmail())
+                .build());
+
+
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("alice@example.com", result.getEmail());
+        verify(userRepository, never()).existsByEmail(anyString()); // не проверяем на дубликат
+    }
+
+
+    @Test
+    void updateUser_WhenEmptyEmailAndName_ShouldNotChangeAnything() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setEmail(""); // пустая строка
+        request.setName("");  // пустая строка
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userMapper.mapToDto(any())).thenReturn(UserDto.builder()
+                .id(existingUser.getId())
+                .name(existingUser.getName())
+                .email(existingUser.getEmail())
+                .build());
+        when(userRepository.existsByEmail(any())).thenReturn(false);
+
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Alice", result.getName());
+        assertEquals("alice@example.com", result.getEmail());
+        assertEquals("", request.getName());
+        assertEquals("", request.getEmail());
+    }
+
+    @Test
+    void updateUser_WhenBlankName_ShouldPreserveIt() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setName("   "); // пробелы
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        when(userRepository.existsByEmail(any())).thenReturn(false);
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(existingUser.getName(), result.getName());
+    }
+
+    @Test
+    void updateUser_WhenNullName_ShouldPreserveOldValue() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setEmail("new@example.com");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail("new@example.com")).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("Alice", result.getName());
+        assertEquals("new@example.com", result.getEmail());
+    }
+
+    @Test
+    void updateUser_WhenNullEmail_ShouldPreserveOldValue() {
+        // Given
+        UpdatedUserRequest request = new UpdatedUserRequest();
+        request.setName("New Name");
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(i -> i.getArgument(0));
+        when(userMapper.mapToDto(any(User.class))).thenAnswer(i -> {
+            User u = i.getArgument(0);
+            return UserDto.builder()
+                    .id(u.getId())
+                    .name(u.getName())
+                    .email(u.getEmail())
+                    .build();
+        });
+
+        // When
+        UserDto result = userService.updateUser(1L, request);
+
+        // Then
+        assertNotNull(result);
+        assertEquals("New Name", result.getName());
+        assertEquals("alice@example.com", result.getEmail());
     }
 
 }

@@ -123,7 +123,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         return itemRepository.findAllByRequestId(requestId).stream().map(mapper::mapToRespond).toList();
     }
 
-    private ItemDto mapToDto(Item item) {
+    public ItemDto mapToDto(Item item) {
         ItemDto itemDto = mapper.mapToItemDto(item);
         itemDto.setComments(commentRepository.findAllByItem(item).stream().map(commentMapper::mapToDto).toList());
         Optional<Booking> lastBooking = bookingRepository.findLastFinishedBookingByItem(item);
@@ -135,7 +135,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
         return itemDto;
     }
 
-    private static Item updateItemFields(Item item, UpdateItemRequest updateItemRequest) {
+    public static Item updateItemFields(Item item, UpdateItemRequest updateItemRequest) {
 
         if (updateItemRequest.hasName()) {
             item.setName(updateItemRequest.getName());

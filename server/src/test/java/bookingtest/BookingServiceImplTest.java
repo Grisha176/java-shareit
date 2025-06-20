@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.NewBookingRequest;
 import ru.practicum.shareit.booking.enums.BookingState;
@@ -28,10 +29,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration(classes = ru.practicum.shareit.ShareItApp.class)
 public class BookingServiceImplTest {
 
     @Mock
@@ -54,9 +57,17 @@ public class BookingServiceImplTest {
     private User booker;
     private Item item;
     private Booking booking;
+    private User owner;
+    private LocalDateTime now;
 
     @BeforeEach
     void setUp() {
+        now = LocalDateTime.now();
+
+        owner = new User();
+        owner.setId(1L);
+        owner.setName("Owner");
+        owner.setEmail("owner@example.com");
 
 
         newBookingRequest = NewBookingRequest.builder()
@@ -322,5 +333,139 @@ public class BookingServiceImplTest {
         when(itemRepository.findById(1L)).thenReturn(java.util.Optional.of(item));
 
         assertThrows(AccessException.class, () -> bookingService.respondToBooking(200L, 1L, true));
+    }
+
+    @Test
+    void whenStateAll_ShouldCallFindAllByItemOwnerId() {
+        // Given
+        List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
+        when(bookingRepository.findAllByItemOwnerId(owner.getId())).thenReturn(bookings);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.ALL);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerId(owner.getId());
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenStateCurrent_ShouldCallFindAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsBefore() {
+        // Given
+        BookingDto mockedDto = BookingDto.builder()
+                .id(booking.getId())
+                .status(booking.getStatus())
+                .build();
+        List<Booking> bookings = List.of(createBooking(now.minusDays(1), now.minusHours(1), BookingStatus.WAITING));
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsBefore(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.CURRENT);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsBefore(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class));
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenStatePast_ShouldCallFindAllByItemOwnerIdAndEndTimeIsBefore() {
+        // Given
+        Booking booking = createBooking(now.minusDays(2), now.minusDays(1), BookingStatus.WAITING);
+
+        List<Booking> bookings = List.of(booking);
+
+        BookingDto mockedDto = BookingDto.builder()
+                .id(booking.getId())
+                .status(booking.getStatus())
+                .build();
+
+        // Мокаем репозиторий
+        when(bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any(LocalDateTime.class))).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.PAST);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any());
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenStateFuture_ShouldCallFindAllByItemOwnerIdAndStartTimeIsAfter() {
+        // Given
+        BookingDto mockedDto = BookingDto.builder()
+                .id(booking.getId())
+                .status(booking.getStatus())
+                .build();
+        List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
+        when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfter(anyLong(), any(LocalDateTime.class))).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.FUTURE);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerIdAndStartTimeIsAfter(anyLong(), any(LocalDateTime.class));
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenStateWaiting_ShouldCallFindAllByItemOwnerIdAndStatus() {
+        // Given
+        List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
+        when(bookingRepository.findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.WAITING)).thenReturn(bookings);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.WAITING);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.WAITING);
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenStateRejected_ShouldCallFindAllByItemOwnerIdAndStatus() {
+        // Given
+        List<Booking> bookings = List.of(createBooking(now.minusDays(2), now.minusDays(1), BookingStatus.REJECTED));
+        when(bookingRepository.findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.REJECTED)).thenReturn(bookings);
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.REJECTED);
+
+        // Then
+        verify(bookingRepository).findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.REJECTED);
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
+    void whenUnknownState_ShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> bookingService.getAllItemBooking(owner.getId(), mock(BookingState.class)));
+    }
+
+    @Test
+    void whenNoBookingsFound_ShouldReturnEmptyList() {
+        // Given
+        when(bookingRepository.findAllByItemOwnerId(owner.getId())).thenReturn(List.of());
+
+        // When
+        List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.ALL);
+
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    // Вспомогательный метод для создания бронирований
+    private Booking createBooking(LocalDateTime start, LocalDateTime end, BookingStatus status) {
+        return Booking.builder()
+                .id(1L)
+                .startTime(start)
+                .endTime(end)
+                .status(status)
+                .item(item)
+                .booker(User.builder().id(2L).build())
+                .build();
     }
 }

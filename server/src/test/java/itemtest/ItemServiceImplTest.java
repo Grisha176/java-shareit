@@ -29,6 +29,7 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,15 +59,34 @@ class ItemServiceImplTest {
     @Mock
     private BookingMapper bookingMapper;
 
+
     private User owner;
     private Item item;
     private ItemDto itemDto;
     private Comment comment;
     private CommentDto commentDto;
     private BookingDto bookingDto;
+    private LocalDateTime now;
+    private User user;
+
 
     @BeforeEach
     void setUp() {
+
+        now = LocalDateTime.now();
+
+        user = new User();
+        user.setId(1L);
+        user.setName("Alice");
+        user.setEmail("alice@example.com");
+
+        commentDto = new CommentDto();
+        commentDto.setText("Хорошая вещь!");
+        commentDto.setItemId(100L);
+        commentDto.setAuthorName("Alice");
+
+        // Инициализируем сущность Comment
+
         owner = new User(1L, "John", "john@example.com");
         item = new Item(1L, "Drill", "A powerful drill", true, owner, null);
         itemDto = new ItemDto(1L, "Drill", "A powerful drill", true, 1L, null, null, null, null);
@@ -240,4 +260,170 @@ class ItemServiceImplTest {
 
         assertThat(result).isEqualTo(responses);
     }
+
+    @Test
+    void addComment_WhenUserNotFound_ShouldThrowNotFoundException() {
+        // Given
+        when(userRepository.findById(999L)).thenReturn(Optional.empty());
+
+        // When + Then
+        NotFoundException exception = assertThrows(NotFoundException.class,
+                () -> itemService.addComment(999L, commentDto));
+
+        assertTrue(exception.getMessage().contains("Пользователь с id:"));
+    }
+
+    @Test
+    void mapToDto_WhenItemHasComments_ShouldSetComments() {
+        // Given
+        CommentDto commentDto = CommentDto.builder()
+                .id(100L)
+                .text("Good tool")
+                .build();
+
+        when(commentRepository.findAllByItem(item)).thenReturn(List.of(new Comment()));
+        when(commentMapper.mapToDto(any(Comment.class))).thenReturn(commentDto);
+        when(itemMapper.mapToItemDto(any())).thenReturn(itemDto);
+
+        // When
+        ItemDto dto = itemService.mapToDto(item);
+
+        // Then
+        assertNotNull(dto.getComments());
+        assertThat(dto.getComments()).hasSize(1).contains(commentDto);
+    }
+
+    @Test
+    void mapToDto_WhenLastBookingExists_ShouldSetLastBooking() {
+        // Given
+        Booking lastBooking = Booking.builder()
+                .id(500L)
+                .startTime(now.minusDays(2))
+                .endTime(now.minusDays(1))
+                .status(BookingStatus.WAITING)
+                .item(item)
+                .booker(new User())
+                .build();
+
+        when(bookingRepository.findLastFinishedBookingByItem(item)).thenReturn(Optional.of(lastBooking));
+        when(bookingMapper.mapToDto(lastBooking)).thenReturn(BookingDto.builder().id(500L).build());
+        when(itemMapper.mapToItemDto(any())).thenReturn(itemDto);
+
+        // When
+        ItemDto dto = itemService.mapToDto(item);
+
+        // Then
+        assertNotNull(dto.getLastBooking());
+        assertEquals(500L, dto.getLastBooking().getId());
+    }
+
+    @Test
+    void mapToDto_WhenNextBookingExists_ShouldSetNextBooking() {
+        // Given
+        Booking nextBooking = Booking.builder()
+                .id(600L)
+                .startTime(now.plusDays(1))
+                .endTime(now.plusDays(2))
+                .status(BookingStatus.WAITING)
+                .item(item)
+                .booker(new User())
+                .build();
+
+        when(bookingRepository.findNextBookingByItem(item)).thenReturn(Optional.of(nextBooking));
+        when(bookingMapper.mapToDto(nextBooking)).thenReturn(BookingDto.builder().id(600L).build());
+        when(itemMapper.mapToItemDto(any())).thenReturn(itemDto);
+
+        // When
+        ItemDto dto = itemService.mapToDto(item);
+
+        // Then
+        assertNotNull(dto.getNextBooking());
+        assertEquals(600L, dto.getNextBooking().getId());
+    }
+
+    @Test
+    void mapToDto_WhenNoBookings_ShouldNotSetLastAndNextBooking() {
+        // Given
+        when(bookingRepository.findLastFinishedBookingByItem(item)).thenReturn(Optional.empty());
+        when(bookingRepository.findNextBookingByItem(item)).thenReturn(Optional.empty());
+        when(itemMapper.mapToItemDto(any())).thenReturn(itemDto);
+
+        // When
+        ItemDto dto = itemService.mapToDto(item);
+
+        // Then
+        assertNull(dto.getLastBooking());
+        assertNull(dto.getNextBooking());
+    }
+
+    @Test
+    void updateItemFields_WhenNameIsProvided_ShouldSetName() {
+        // Given
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setName("Updated name");
+
+        // When
+        Item updated = itemService.updateItemFields(item, request);
+
+        // Then
+        assertEquals("Updated name", updated.getName());
+    }
+
+    @Test
+    void updateItemFields_WhenDescriptionIsProvided_ShouldSetDescription() {
+        // Given
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setDescription("New description");
+
+        // When
+        Item updated = itemService.updateItemFields(item, request);
+
+        // Then
+        assertEquals("New description", updated.getDescription());
+    }
+
+    @Test
+    void updateItemFields_WhenAvailableIsTrue_ShouldSetAvailable() {
+        // Given
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setAvailable(true);
+
+        // When
+        Item updated = itemService.updateItemFields(item, request);
+
+        // Then
+        assertTrue(updated.isAvailable());
+    }
+
+    @Test
+    void updateItemFields_WhenAvailableIsFalse_ShouldSetAvailable() {
+        // Given
+        item.setAvailable(true);
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setAvailable(false);
+
+        // When
+        Item updated = itemService.updateItemFields(item, request);
+
+        // Then
+        assertFalse(updated.isAvailable());
+    }
+
+    @Test
+    void updateItemFields_WhenNoUpdates_ShouldPreserveOriginalValues() {
+        // Given
+
+        item.setDescription("Powerful drill");
+        UpdateItemRequest request = new UpdateItemRequest(); // все null/blank
+
+        // When
+        Item updated = itemService.updateItemFields(item, request);
+
+        // Then
+        assertEquals("Drill", updated.getName());
+        assertEquals("Powerful drill", updated.getDescription());
+        assertTrue(updated.isAvailable());
+    }
+
+
 }

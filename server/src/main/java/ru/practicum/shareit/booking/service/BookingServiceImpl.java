@@ -66,6 +66,9 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public List<BookingDto> getAllBooking(Long userId, BookingState state) {
         LocalDateTime now = LocalDateTime.now();
+        if(userId == null){
+            throw new ValidationException("id не может быть null");
+        }
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
 
 
@@ -144,5 +147,6 @@ public class BookingServiceImpl implements BookingService {
                 throw new IllegalArgumentException("Unknown state: " + state);
         }
     }
+
 
 }
