@@ -14,7 +14,7 @@ import ru.practirum.shareit.item.dto.UpdateItem;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/items")
 @Validated
 @Slf4j
 public class ItemController {

@@ -18,7 +18,6 @@ import ru.practirum.shareit.user.dto.UpdateUserRequest;
 @Slf4j
 public class UserController {
 
-    @Autowired
     private final UserClient userClient;
 
     @GetMapping("/users")

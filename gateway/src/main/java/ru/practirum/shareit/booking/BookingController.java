@@ -14,7 +14,7 @@ import ru.practirum.shareit.booking.dto.NewBookingRequest;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping(path = "/users")
+@RequestMapping(path = "/bookings")
 @Validated
 @Slf4j
 public class BookingController {
