@@ -49,5 +49,18 @@ public class BookingController {
         }
     }
 
+    @GetMapping("/owner")
+    public List<BookingDto> getAllOwnerBooking(@RequestHeader("X-Sharer-User-Id") Long userIdStr, @RequestParam(value = "state", defaultValue = "ALL") String status) {
+        try {
+            BookingState state = BookingState.valueOf(status);
+            log.info("Запрос на получение бронирований,userId: {}",userIdStr);
+            return bookingService.getAllItemBooking(userIdStr, state);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
+
 
 }

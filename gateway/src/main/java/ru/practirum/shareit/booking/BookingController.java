@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practirum.shareit.booking.dto.BookingState;
 import ru.practirum.shareit.booking.dto.NewBookingRequest;
 
+import java.util.List;
+
 
 @Controller
 @RequiredArgsConstructor
@@ -22,7 +24,7 @@ public class BookingController {
     private final BookingClient bookingClient;
 
     @PostMapping
-    public ResponseEntity<Object> addBooking(@Valid @RequestBody NewBookingRequest request, @RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<Object> addBooking(@RequestHeader("X-Sharer-User-Id") Long userId,@Valid @RequestBody NewBookingRequest request) {
         request.setBroker(userId);
         log.info("Запрос на добавление бронирования");
         return bookingClient.create(userId,request);
@@ -41,14 +43,26 @@ public class BookingController {
         return bookingClient.getBooking(userId, bookingId);
     }
 
-    @GetMapping
-    public ResponseEntity<Object> getAllBooking(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam(value = "state", defaultValue = "ALL") String status) {
+    @GetMapping("/owner")
+    public ResponseEntity<Object> getAllOwnerBooking(@RequestHeader("X-Sharer-User-Id") Long userId, @RequestParam(value = "state", defaultValue = "ALL") String status) {
         try {
             BookingState state = BookingState.valueOf(status);
             log.info("Запрос на получение бронирований,userId: {}",userId);
-            return bookingClient.getBookings(userId,state);
+            return bookingClient.getAllOwner(userId,state);
         } catch (IllegalArgumentException e) {
             throw new RuntimeException(e);
         }
     }
+
+    @GetMapping
+    public ResponseEntity<Object> getAllBooking(@RequestHeader("X-Sharer-User-Id") Long userIdStr, @RequestParam(value = "state", defaultValue = "ALL") String status) {
+        try {
+            BookingState state = BookingState.valueOf(status);
+            log.info("Запрос на получение бронирований,userId: {}",userIdStr);
+            return bookingClient.getBookings(userIdStr, state);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }

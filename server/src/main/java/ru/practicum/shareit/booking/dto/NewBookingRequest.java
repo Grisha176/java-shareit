@@ -1,9 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -11,6 +8,8 @@ import java.time.LocalDateTime;
 @Setter
 @EqualsAndHashCode
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class NewBookingRequest {
 
     private LocalDateTime start;

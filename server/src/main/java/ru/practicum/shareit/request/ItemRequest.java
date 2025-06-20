@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -26,5 +28,7 @@ public class ItemRequest {
     private Long requestorId;
     @Column(name = "created_time")
     private LocalDateTime createdTime = LocalDateTime.now();
+    @OneToMany(mappedBy = "request")
+    List<Item> items;
 
 }

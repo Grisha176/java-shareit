@@ -3,8 +3,12 @@ package ru.practicum.shareit.request.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.mappers.ItemRequestMapper;
+import ru.practicum.shareit.mappers.UserMapper;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.dto.NewItemRequestDto;
@@ -13,6 +17,7 @@ import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +27,8 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestMapper mapper;
     private final ItemRequestRepository itemRequestRepository;
     private final ItemService itemService;
+    private final ItemRepository itemRepository;
+    private final UserMapper userMapper;
 
     @Override
     public ItemRequestDto addNewRequest(Long userId, NewItemRequestDto itemRequestDto) {
@@ -38,7 +45,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     public ItemRequestDto getById(Long requestId) {
-        ItemRequestDto itemRequestDto = mapper.mapToDto(itemRequestRepository.findById(requestId).orElseThrow(() -> new NotFoundException(("Запрос с id:" + requestId + " не найден"))));
+       ItemRequestDto itemRequestDto = mapper.mapToDto(itemRequestRepository.findById(requestId).orElseThrow(() -> new NotFoundException(("Запрос с id:" + requestId + " не найден"))));
         itemRequestDto.setItems(itemService.getByRequestId(requestId));
         return itemRequestDto;
     }
@@ -51,6 +58,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         );
         return requests;
     }
+
 
 
 }

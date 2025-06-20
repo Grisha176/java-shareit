@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 
@@ -30,6 +31,10 @@ public class Item {
     @ManyToOne
     @JoinColumn(name = "owner_id",nullable = false)
     private User owner;
-    @Column(name = "request_id")
-    private Long requestId;
+
+    @ManyToOne
+    @JoinColumn(name = "request_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    ItemRequest request;
 }

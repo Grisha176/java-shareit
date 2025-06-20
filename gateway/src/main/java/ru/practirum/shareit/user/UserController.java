@@ -19,32 +19,32 @@ public class UserController {
 
     private final UserClient userClient;
 
-    @GetMapping("/users")
+    @GetMapping
     public ResponseEntity<Object> getAllUsers() {
         log.info("Получение всех пользователей");
         return userClient.findAll();
     }
 
-    @GetMapping("/users/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<Object> getUsersById(@PathVariable Long id) {
         log.info("Получение пользователя с id: {}", id);
         return userClient.findById(id);
     }
 
-    @PostMapping("/users")
+    @PostMapping
     public ResponseEntity<Object> addUser(@Valid @RequestBody final NewUserRequest user) {
         log.info("Запрос на добавление пользователя");
         return userClient.create(user);
     }
 
 
-    @PatchMapping("/users/{userId}")
+    @PatchMapping("/{userId}")
     public ResponseEntity<Object> updateUser(@PathVariable("userId") Long userId, @Valid @RequestBody UpdateUserRequest user) {
         log.info("Запрос на обновление пользователя с id: {}", userId);
         return userClient.update(userId,user);
     }
 
-    @DeleteMapping("users/{userId}")
+    @DeleteMapping("/{userId}")
     public ResponseEntity<Object> deleteItem(@PathVariable Long userId) {
         log.info("Удаление пользователя с id: {}", userId);
         return userClient.deleteById(userId);

@@ -124,6 +124,8 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDto> getAllItemBooking(Long userId, BookingState state) {
         LocalDateTime now = LocalDateTime.now();
 
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
+
         switch (state.toString()) {
             case "ALL":
                 log.info("Получение всех бронирований вещей пользовател с id: {}", userId);
