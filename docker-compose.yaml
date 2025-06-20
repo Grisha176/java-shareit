@@ -28,6 +28,8 @@ services:
     container_name: postgres
     ports:
       - "6541:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=shareit
       - POSTGRES_USER=shareit
@@ -37,3 +39,5 @@ services:
       timeout: 5s
       interval: 5s
       retries: 10
+volumes:
+  postgres_data:
