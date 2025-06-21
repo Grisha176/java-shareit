@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practirum.shareit.booking.dto.BookingState;
 import ru.practirum.shareit.booking.dto.NewBookingRequest;
 
-import java.util.List;
-
 
 @Controller
 @RequiredArgsConstructor
