@@ -53,10 +53,10 @@ public class ItemServiceInMemoryImpl implements ItemService {
         itemDto.setOwnerId(userId);
         Item item = mapper.mapToItem(itemDto);
         item.setOwner(user);
-        System.out.println("requestId =   "+itemDto.getRequestId());
+        System.out.println("requestId =   " + itemDto.getRequestId());
         ItemRequest itemRequest = null;
         if (itemDto.getRequestId() != null) {
-             itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+            itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
                     .orElseThrow(() -> new EntityNotFoundException("Запроса на данный предмет не существует"));
         }
 
