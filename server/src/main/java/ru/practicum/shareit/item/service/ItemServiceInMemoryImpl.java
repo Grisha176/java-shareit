@@ -1,8 +1,10 @@
 package ru.practicum.shareit.item.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dto.RespondItemRequest;
 import ru.practicum.shareit.mappers.BookingMapper;
@@ -19,6 +21,8 @@ import ru.practicum.shareit.item.dto.UpdateItemRequest;
 import ru.practicum.shareit.mappers.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -28,7 +32,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 @Slf4j
 public class ItemServiceInMemoryImpl implements ItemService {
 
@@ -39,6 +43,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
     private final ItemMapper mapper;
     private final BookingMapper bookingMapper;
     private final CommentMapper commentMapper;
+    private final ItemRequestRepository itemRequestRepository;
 
 
     @Transactional
@@ -48,7 +53,15 @@ public class ItemServiceInMemoryImpl implements ItemService {
         itemDto.setOwnerId(userId);
         Item item = mapper.mapToItem(itemDto);
         item.setOwner(user);
+        System.out.println("requestId =   "+itemDto.getRequestId());
+        ItemRequest itemRequest = null;
+        if (itemDto.getRequestId() != null) {
+             itemRequest = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new EntityNotFoundException("Запроса на данный предмет не существует"));
+        }
+
         item = itemRepository.save(item);
+        item.setRequest(itemRequest);
         log.info("Создание вещи с id: {}", item.getId());
         return mapToDto(item);
     }
@@ -120,6 +133,7 @@ public class ItemServiceInMemoryImpl implements ItemService {
 
     @Override
     public List<RespondItemRequest> getByRequestId(Long requestId) {
+        System.out.println(itemRepository.findAllByRequestId(requestId));
         return itemRepository.findAllByRequestId(requestId).stream().map(mapper::mapToRespond).toList();
     }
 

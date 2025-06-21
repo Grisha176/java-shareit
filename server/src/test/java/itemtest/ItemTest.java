@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.json.JsonTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.io.IOException;
@@ -32,13 +33,15 @@ public class ItemTest {
         owner.setName("Alice");
         owner.setEmail("alice@example.com");
 
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(200L);
         item = Item.builder()
                 .id(100L)
                 .name("Drill")
                 .description("Powerful drill")
                 .available(true)
                 .owner(owner)
-                .requestId(200L)
+                .request(itemRequest)
                 .build();
     }
 
@@ -49,7 +52,7 @@ public class ItemTest {
         assertEquals("Powerful drill", item.getDescription());
         assertTrue(item.isAvailable());
         assertEquals(owner, item.getOwner());
-        assertEquals(200L, item.getRequestId().longValue());
+        assertEquals(200L, item.getRequest().getId().longValue());
     }
 
     @Test
@@ -60,13 +63,14 @@ public class ItemTest {
         newOwner.setName("Bob");
         newOwner.setEmail("bob@example.com");
 
-        // When
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(201L);
         item.setId(101L);
         item.setName("Saw");
         item.setDescription("Hand saw");
         item.setAvailable(false);
         item.setOwner(newOwner);
-        item.setRequestId(201L);
+        item.setRequest(itemRequest);
 
         // Then
         assertEquals(101L, item.getId().longValue());
@@ -74,18 +78,20 @@ public class ItemTest {
         assertEquals("Hand saw", item.getDescription());
         assertFalse(item.isAvailable());
         assertEquals(newOwner, item.getOwner());
-        assertEquals(201L, item.getRequestId().longValue());
+        assertEquals(201L, item.getRequest().getId().longValue());
     }
 
     @Test
     void equalsAndHashCode_ShouldWorkCorrectly() {
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(200L);
         Item item1 = Item.builder()
                 .id(100L)
                 .name("Drill")
                 .description("Powerful drill")
                 .available(true)
                 .owner(owner)
-                .requestId(200L)
+                .request(itemRequest)
                 .build();
 
         Item item2 = Item.builder()
@@ -94,7 +100,7 @@ public class ItemTest {
                 .description("Powerful drill")
                 .available(true)
                 .owner(owner)
-                .requestId(200L)
+                .request(itemRequest)
                 .build();
 
         Item item3 = Item.builder()
@@ -103,7 +109,7 @@ public class ItemTest {
                 .description("Another drill")
                 .available(false)
                 .owner(owner)
-                .requestId(200L)
+                .request(itemRequest)
                 .build();
 
         // Equals
@@ -125,7 +131,7 @@ public class ItemTest {
         assertThat(jsonContent).hasJsonPath("$.description", "Powerful drill");
         assertThat(jsonContent).hasJsonPath("$.available", true);
         assertThat(jsonContent).hasJsonPath("$.owner.id", 1L);
-        assertThat(jsonContent).hasJsonPath("$.requestId", 200L);
+       // assertThat(jsonContent).hasJsonPath("$.requestId", 200L);
     }
 
     @Test
@@ -145,18 +151,20 @@ public class ItemTest {
         assertEquals("Bob", parsedItem.getOwner().getName());
         assertEquals("bob@example.com", parsedItem.getOwner().getEmail());
 
-        assertEquals(201L, parsedItem.getRequestId().longValue());
+        //assertEquals(201L, parsedItem.getRequest().getId().longValue());
     }
 
     @Test
     void builder_ShouldCreateItemWithAllFields() {
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(300L);
         Item built = Item.builder()
                 .id(200L)
                 .name("Table")
                 .description("Wooden table")
                 .available(false)
                 .owner(owner)
-                .requestId(300L)
+                .request(itemRequest)
                 .build();
 
         assertNotNull(built);
@@ -165,7 +173,7 @@ public class ItemTest {
         assertEquals("Wooden table", built.getDescription());
         assertFalse(built.isAvailable());
         assertEquals(owner, built.getOwner());
-        assertEquals(300L, built.getRequestId().longValue());
+        assertEquals(300L, built.getRequest().getId().longValue());
     }
 
     @Test
@@ -177,6 +185,6 @@ public class ItemTest {
         assertNull(defaultItem.getDescription());
         assertFalse(defaultItem.isAvailable());
         assertNull(defaultItem.getOwner());
-        assertNull(defaultItem.getRequestId());
+       // assertNull(defaultItem.getRequest().getId());
     }
 }

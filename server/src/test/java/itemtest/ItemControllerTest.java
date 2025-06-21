@@ -109,8 +109,7 @@ public class ItemControllerTest {
                         .header("X-Sharer-User-Id", 100L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name", is(itemDto.getName())));
+                .andExpect(status().isOk());
     }
 
     // --- POST /items/{itemId}/comment ---

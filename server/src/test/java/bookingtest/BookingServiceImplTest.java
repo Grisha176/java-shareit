@@ -340,6 +340,7 @@ public class BookingServiceImplTest {
         // Given
         List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
         when(bookingRepository.findAllByItemOwnerId(owner.getId())).thenReturn(bookings);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.ALL);
@@ -359,6 +360,7 @@ public class BookingServiceImplTest {
         List<Booking> bookings = List.of(createBooking(now.minusDays(1), now.minusHours(1), BookingStatus.WAITING));
         when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsBeforeAndEndTimeIsBefore(anyLong(), any(LocalDateTime.class), any(LocalDateTime.class))).thenReturn(bookings);
         when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.CURRENT);
@@ -383,6 +385,7 @@ public class BookingServiceImplTest {
         // Мокаем репозиторий
         when(bookingRepository.findAllByItemOwnerIdAndEndTimeIsBefore(anyLong(), any(LocalDateTime.class))).thenReturn(bookings);
         when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.PAST);
@@ -402,6 +405,7 @@ public class BookingServiceImplTest {
         List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
         when(bookingRepository.findAllByItemOwnerIdAndStartTimeIsAfter(anyLong(), any(LocalDateTime.class))).thenReturn(bookings);
         when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(mockedDto);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.FUTURE);
@@ -416,6 +420,7 @@ public class BookingServiceImplTest {
         // Given
         List<Booking> bookings = List.of(createBooking(now.plusDays(1), now.plusDays(2), BookingStatus.WAITING));
         when(bookingRepository.findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.WAITING)).thenReturn(bookings);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.WAITING);
@@ -430,6 +435,7 @@ public class BookingServiceImplTest {
         // Given
         List<Booking> bookings = List.of(createBooking(now.minusDays(2), now.minusDays(1), BookingStatus.REJECTED));
         when(bookingRepository.findAllByItemOwnerIdAndStatus(owner.getId(), BookingStatus.REJECTED)).thenReturn(bookings);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.REJECTED);
@@ -441,7 +447,7 @@ public class BookingServiceImplTest {
 
     @Test
     void whenUnknownState_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(NotFoundException.class,
                 () -> bookingService.getAllItemBooking(owner.getId(), mock(BookingState.class)));
     }
 
@@ -449,6 +455,7 @@ public class BookingServiceImplTest {
     void whenNoBookingsFound_ShouldReturnEmptyList() {
         // Given
         when(bookingRepository.findAllByItemOwnerId(owner.getId())).thenReturn(List.of());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
 
         // When
         List<BookingDto> result = bookingService.getAllItemBooking(owner.getId(), BookingState.ALL);

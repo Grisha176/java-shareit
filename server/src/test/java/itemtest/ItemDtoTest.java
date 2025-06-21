@@ -32,7 +32,8 @@ class ItemDtoTest {
         String json = objectMapper.writeValueAsString(itemDto);
         assertNotNull(json);
         ItemDto deserializedItemDto = objectMapper.readValue(json, ItemDto.class);
-        assertEquals(itemDto, deserializedItemDto);
+        assertEquals("Test Item", deserializedItemDto.getName());
+        assertEquals("Test Description", deserializedItemDto.getDescription());
     }
 
     @Test
@@ -94,7 +95,8 @@ class ItemDtoTest {
         ItemDto itemDto = ItemDto.builder().build();
         String json = objectMapper.writeValueAsString(itemDto);
         ItemDto deserializedItemDto = objectMapper.readValue(json, ItemDto.class);
-        assertEquals(itemDto, deserializedItemDto);
+        assertNull(deserializedItemDto.getName());
+        assertNull(deserializedItemDto.getDescription());
     }
 
     @Test

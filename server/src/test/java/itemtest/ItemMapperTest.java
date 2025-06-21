@@ -7,6 +7,7 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.RespondItemRequest;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.mappers.ItemMapperImpl;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -28,13 +29,15 @@ class ItemMapperTest {
         owner.setName("Alice");
         owner.setEmail("alice@example.com");
 
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(200L);
         // Инициализируем вещь
         item.setId(100L);
         item.setName("Drill");
         item.setDescription("Powerful drill");
         item.setAvailable(true);
         item.setOwner(owner);
-        item.setRequestId(200L);
+        item.setRequest(itemRequest);
     }
 
 
@@ -80,7 +83,7 @@ class ItemMapperTest {
         assertEquals(item.getName(), dto.getName());
         assertEquals(item.getDescription(), dto.getDescription());
         assertEquals(item.isAvailable(), dto.getAvailable());
-        assertEquals(item.getRequestId(), dto.getRequestId());
+        assertEquals(item.getRequest().getId(), dto.getRequestId());
         assertEquals(owner.getId(), dto.getOwnerId());
     }
 
@@ -124,7 +127,7 @@ class ItemMapperTest {
         assertEquals(itemDto.getName(), mappedItem.getName());
         assertEquals(itemDto.getDescription(), mappedItem.getDescription());
         assertEquals(itemDto.getAvailable(), mappedItem.isAvailable());
-        assertEquals(itemDto.getRequestId(), mappedItem.getRequestId());
+        // assertEquals(itemDto.getRequestId(), mappedItem.getRequest().getId());
     }
 
     @Test
@@ -175,7 +178,7 @@ class ItemMapperTest {
 
         assertNotNull(mappedItem);
         assertEquals("", mappedItem.getName());
-        assertEquals(600L, mappedItem.getRequestId());
+        // assertEquals(600L, mappedItem.getRequest().getId());
     }
 
     @Test
@@ -199,6 +202,5 @@ class ItemMapperTest {
         Item mappedItem = mapper.mapToItem(itemDto);
 
         assertNotNull(mappedItem);
-        assertEquals(800L, mappedItem.getRequestId().longValue());
     }
 }

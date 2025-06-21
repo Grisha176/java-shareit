@@ -53,7 +53,7 @@ class ItemRequestServiceImplTest {
     void setUp() {
         user = new User(1L, "John", "john@example.com");
         newItemRequestDto = new NewItemRequestDto("Хочу дрель");
-        itemRequest = new ItemRequest(1L, "Хочу дрель", user.getId(), LocalDateTime.now());
+        itemRequest = new ItemRequest(1L, "Хочу дрель", user.getId(),LocalDateTime.now(),List.of());
         itemRequestDto = new ItemRequestDto(1L, "Хочу дрель", user.getId(), List.of(), LocalDateTime.now().toString());
     }
 

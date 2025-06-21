@@ -27,15 +27,13 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final ItemRequestMapper mapper;
     private final ItemRequestRepository itemRequestRepository;
     private final ItemService itemService;
-    private final ItemRepository itemRepository;
-    private final UserMapper userMapper;
 
     @Override
     public ItemRequestDto addNewRequest(Long userId, NewItemRequestDto itemRequestDto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("Пользователь с id:" + userId + " не найден"));
         ItemRequest itemRequest = mapper.mapToItemRequest(itemRequestDto, userId);
-        itemRequest = itemRequestRepository.save(itemRequest);
-        return mapper.mapToDto(itemRequest);
+        ItemRequest savedItemRequest = itemRequestRepository.save(itemRequest);
+        return mapper.mapToDto(savedItemRequest);
     }
 
     @Override

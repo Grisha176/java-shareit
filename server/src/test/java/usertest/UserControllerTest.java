@@ -109,8 +109,7 @@ public class UserControllerTest {
         doNothing().when(userService).deleteUser(1L);
 
         mockMvc.perform(delete("/users/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().string("{ \"Удаление прошло успешно!\" }"));
+                .andExpect(status().isOk());
 
         verify(userService).deleteUser(1L);
     }

@@ -21,6 +21,7 @@ import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemServiceInMemoryImpl;
 import ru.practicum.shareit.mappers.BookingMapper;
 import ru.practicum.shareit.mappers.ItemMapper;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -94,12 +95,14 @@ class ItemServiceImplTest {
         comment = new Comment(1L, "Great item!", item, owner, LocalDateTime.now());
         commentDto = new CommentDto(1L, "Great item!", 1L, "John", LocalDateTime.now());
 
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(2L);
         bookingDto = BookingDto.builder()
                 .id(1L)
                 .start(LocalDateTime.of(2020, 12, 1, 12, 20))
                 .end(LocalDateTime.of(2020, 12, 2, 12, 20))
                 .status(BookingStatus.WAITING)
-                .item(new Item(1L, "Drill", "Powerful drill", true, null, 2L))
+                .item(new Item(1L, "Drill", "Powerful drill", true, null, itemRequest))
                 .build();
     }
 

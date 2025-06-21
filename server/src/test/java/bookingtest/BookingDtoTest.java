@@ -9,6 +9,7 @@ import org.springframework.test.context.ContextConfiguration;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.enums.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.User;
 
 import java.io.IOException;
@@ -30,13 +31,15 @@ public class BookingDtoTest {
     void setUp() {
         user = new User(1L, "Alice", "alice@example.com");
 
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setId(2L);
         dto = BookingDto.builder()
                 .id(1L)
                 .start(LocalDateTime.of(2020, 12, 1, 12, 20))
                 .end(LocalDateTime.of(2020, 12, 2, 12, 20))
                 .status(BookingStatus.WAITING)
                 .booker(user)
-                .item(new Item(1L, "Drill", "Powerful drill", true, user, 2L))
+                .item(new Item(1L, "Drill", "Powerful drill", true, user, itemRequest))
                 .build();
     }
 
