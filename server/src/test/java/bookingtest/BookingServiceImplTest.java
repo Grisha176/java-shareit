@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -126,6 +127,20 @@ public class BookingServiceImplTest {
         assertEquals(bookingDto.getStatus(), result.getStatus());
         verify(bookingRepository, times(1)).save(any(Booking.class));
 
+    }
+
+    @Test
+    void getAllItemBooking_withUnknownState_shouldThrowException() {
+        // Given
+        BookingState unknownState = mock(BookingState.class);
+        when(unknownState.toString()).thenReturn("UNKNOWN");
+        when(userRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booker));
+
+        // When & Then
+        assertThatThrownBy(() -> bookingService.getAllItemBooking(1L, unknownState))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown state")
+                .hasMessageContaining("UNKNOWN");
     }
 
 
@@ -475,4 +490,149 @@ public class BookingServiceImplTest {
                 .booker(User.builder().id(2L).build())
                 .build();
     }
+
+    @Test
+    void getAllBooking_withStateAll_shouldReturnAllBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking(), new Booking());
+
+        when(bookingRepository.findAllByBookerId(userId)).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.ALL);
+
+        assertThat(result).hasSize(2);
+        verify(bookingRepository).findAllByBookerId(anyLong());
+    }
+
+    // === Тест: getAllBooking с CURRENT ===
+    @Test
+    void getAllBooking_withStateCurrent_shouldReturnCurrentBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking());
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsBefore(any(), any(), any()))
+                .thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.CURRENT);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsBeforeAndEndTimeIsBefore(any(), any(), any());
+    }
+
+    // === Тест: getAllBooking с PAST ===
+    @Test
+    void getAllBooking_withStatePast_shouldReturnPastBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking());
+        when(bookingRepository.findAllByBookerIdAndEndTimeIsBefore(anyLong(), any())).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+
+
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.PAST);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findAllByBookerIdAndEndTimeIsBefore(anyLong(), any());
+    }
+
+    // === Тест: getAllBooking с FUTURE ===
+    @Test
+    void getAllBooking_withStateFuture_shouldReturnFutureBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking());
+        when(bookingRepository.findAllByBookerIdAndStartTimeIsAfter(anyLong(), any())).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.FUTURE);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findAllByBookerIdAndStartTimeIsAfter(anyLong(), any());
+    }
+
+    // === Тест: getAllBooking с WAITING ===
+    @Test
+    void getAllBooking_withStateWaiting_shouldReturnWaitingBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking());
+        when(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.WAITING)).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.WAITING);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findAllByBookerIdAndStatus(userId, BookingStatus.WAITING);
+    }
+
+    // === Тест: getAllBooking с REJECTED ===
+    @Test
+    void getAllBooking_withStateRejected_shouldReturnRejectedBookings() {
+        Long userId = 1L;
+        List<Booking> bookings = List.of(new Booking());
+        when(bookingRepository.findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED)).thenReturn(bookings);
+        when(bookingMapper.mapToDto(any(Booking.class))).thenReturn(new BookingDto());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(owner));
+        List<BookingDto> result = bookingService.getAllBooking(userId, BookingState.REJECTED);
+
+        assertThat(result).hasSize(1);
+        verify(bookingRepository).findAllByBookerIdAndStatus(userId, BookingStatus.REJECTED);
+    }
+
+    // === Тест: getAllBooking с неверным состоянием ===
+    @Test
+    void getAllBooking_withUnknownState_shouldThrowException() {
+        assertThatThrownBy(() -> bookingService.getAllBooking(1L, mock(BookingState.class)))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Пользователь с id:1 не найден");
+    }
+
+    // === Тест: getAllBooking без userId ===
+    @Test
+    void getAllBooking_withNullUserId_shouldThrowValidationException() {
+        assertThatThrownBy(() -> bookingService.getAllBooking(null, BookingState.ALL))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("id не может быть null");
+    }
+
+    // === Тест: respondToBooking успешно APPROVED ===
+
+    // === Тест: respondToBooking отклонение (REJECT) ===
+    @Test
+    void respondToBooking_rejectBooking_shouldSetRejected() throws JsonProcessingException {
+        Long userId = 2L;
+        Long bookingId = 100L;
+
+        Item item = new Item();
+        item.setId(10L);
+        item.setAvailable(true);
+
+        Booking booking = new Booking();
+        booking.setId(bookingId);
+        booking.setItem(item);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(itemRepository.findById(10L)).thenReturn(Optional.of(item));
+
+        // Установим владельца
+        User owner = new User();
+        owner.setId(userId);
+        item.setOwner(owner);
+
+        BookingDto dto = new BookingDto();
+        when(bookingMapper.mapToDto(booking)).thenReturn(dto);
+
+        BookingDto result = bookingService.respondToBooking(userId, bookingId, false);
+
+        assertThat(result).isEqualTo(dto);
+        assertThat(booking.getStatus()).isEqualTo(BookingStatus.REJECTED);
+        verify(bookingRepository).save(booking);
+    }
+
+
 }

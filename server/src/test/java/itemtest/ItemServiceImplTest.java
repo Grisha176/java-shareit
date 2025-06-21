@@ -1,5 +1,6 @@
 package itemtest;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +23,7 @@ import ru.practicum.shareit.item.service.ItemServiceInMemoryImpl;
 import ru.practicum.shareit.mappers.BookingMapper;
 import ru.practicum.shareit.mappers.ItemMapper;
 import ru.practicum.shareit.request.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -59,6 +61,9 @@ class ItemServiceImplTest {
 
     @Mock
     private BookingMapper bookingMapper;
+
+    @Mock
+    private ItemRequestRepository itemRequestRepository;
 
 
     private User owner;
@@ -104,6 +109,33 @@ class ItemServiceImplTest {
                 .status(BookingStatus.WAITING)
                 .item(new Item(1L, "Drill", "Powerful drill", true, null, itemRequest))
                 .build();
+    }
+
+    @Test
+    void createItem_whenRequestNotFound_shouldThrowException() {
+        Long userId = 1L;
+        Long requestId = 999L;
+
+
+        User user = new User();
+        user.setId(userId);
+
+        ItemDto itemDto = ItemDto.builder()
+                .name("Телефон")
+                .description("Хороший смартфон")
+                .available(true)
+                .requestId(requestId)
+                .ownerId(1L)
+                .build();
+
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(requestId)).thenReturn(Optional.empty());
+        when(itemMapper.mapToItem(any())).thenReturn(item);
+
+        assertThatThrownBy(() -> itemService.createItem(userId, itemDto))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Запроса на данный предмет не существует");
     }
 
     // --- createItem ---
@@ -426,6 +458,73 @@ class ItemServiceImplTest {
         assertEquals("Drill", updated.getName());
         assertEquals("Powerful drill", updated.getDescription());
         assertTrue(updated.isAvailable());
+    }
+
+
+    @Test
+    void updateItem_shouldNotUpdateIfNameIsNull() {
+        // Given
+        Long itemId = 1L;
+        Long userId = 2L;
+
+        UpdateItemRequest request = new UpdateItemRequest();
+        request.setDescription("Обновленное описание");
+        request.setAvailable(true);
+
+        Item existingItem = new Item();
+        existingItem.setId(itemId);
+        existingItem.setName("Старое имя");
+        existingItem.setDescription("Старое описание");
+        existingItem.setAvailable(false);
+
+        when(itemRepository.findById(itemId)).thenReturn(Optional.of(existingItem));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(new User()));
+        when(itemRepository.save(any(Item.class))).thenReturn(existingItem);
+        when(itemMapper.mapToItemDto(existingItem)).thenReturn(ItemDto.builder()
+                .id(itemId)
+                .name("Старое имя")
+                .description("Обновленное описание")
+                .available(true)
+                .requestId(10L)
+                .build());
+
+        // When
+        ItemDto result = itemService.updateItem(itemId, userId, request);
+
+        // Then
+        assertThat(result.getName()).isEqualTo("Старое имя"); // не изменилось
+        assertThat(result.getDescription()).isEqualTo("Обновленное описание");
+        assertThat(result.getAvailable()).isTrue(); // изменилось
+        assertThat(result.getRequestId()).isEqualTo(10L); // не изменилось
+    }
+
+    @Test
+    void updateItem_whenUserNotFound_shouldThrowNotFoundException() {
+        // Given
+        Long itemId = 1L;
+        Long userId = 999L;
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // When / Then
+        assertThatThrownBy(() -> itemService.updateItem(itemId, userId, new UpdateItemRequest()))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Пользователь с id:" + userId + " не найден");
+    }
+
+    @Test
+    void updateItem_whenItemNotFound_shouldThrowNotFoundException() {
+        // Given
+        Long itemId = 999L;
+        Long userId = 1L;
+
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+
+        // When / Then
+        assertThatThrownBy(() -> itemService.updateItem(itemId, userId, new UpdateItemRequest()))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Пользователь с id:1 не найден");
     }
 
 

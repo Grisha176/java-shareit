@@ -123,5 +123,71 @@ public class BookingControllerTest {
         verify(bookingService, times(1)).getBookingById(eq(1L), eq(1L));
     }
 
+    @Test
+    void getAllBooking_shouldReturnListOfBookings_whenValidUserAndState() throws Exception {
+        String status = "ALL";
+        Long userId = 1L;
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("state", status)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0)); // или больше, если подмокаете данные
+
+        verify(bookingService).getAllBooking(userId, BookingState.valueOf(status));
+    }
+
+    @Test
+    void getAllOwnerBooking_shouldReturnListOfBookings_whenValidOwnerAndState() throws Exception {
+        String status = "ALL";
+        Long ownerId = 1L;
+
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", ownerId)
+                        .param("state", status)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        verify(bookingService).getAllItemBooking(ownerId, BookingState.valueOf(status));
+    }
+
+    @Test
+    void getAllBooking_shouldUseDefaultState_whenNoStateProvided() throws Exception {
+        Long userId = 1L;
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", userId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(bookingService).getAllBooking(userId, BookingState.ALL);
+    }
+
+    @Test
+    void getAllBooking_shouldThrowException_whenInvalidState() throws Exception {
+        String invalidState = "INVALID_STATE";
+        Long userId = 1L;
+
+        mvc.perform(get("/bookings")
+                        .header("X-Sharer-User-Id", userId)
+                        .param("state", invalidState)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isInternalServerError());
+    }
+
+    @Test
+    void getAllOwnerBooking_shouldUseDefaultState_whenNoStateProvided() throws Exception {
+        Long ownerId = 1L;
+
+        mvc.perform(get("/bookings/owner")
+                        .header("X-Sharer-User-Id", ownerId)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+
+        verify(bookingService).getAllItemBooking(ownerId, BookingState.ALL);
+    }
+
 
 }
