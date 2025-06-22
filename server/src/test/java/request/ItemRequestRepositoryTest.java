@@ -9,6 +9,7 @@ import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.User;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,11 +35,13 @@ public class ItemRequestRepositoryTest {
         ItemRequest request1 = new ItemRequest();
         request1.setRequestorId(user.getId());
         request1.setDescription("Description 1");
+        request1.setCreatedTime(LocalDateTime.now());
         entityManager.persist(request1);
 
         ItemRequest request2 = new ItemRequest();
         request2.setRequestorId(user.getId());
         request2.setDescription("Description 2");
+        request2.setCreatedTime(LocalDateTime.now());
         entityManager.persist(request2);
 
         User otherUser = new User();
@@ -49,6 +52,7 @@ public class ItemRequestRepositoryTest {
         ItemRequest request3 = new ItemRequest();
         request3.setRequestorId(otherUser.getId());
         request3.setDescription("Description 3");
+        request3.setCreatedTime(LocalDateTime.now());
         entityManager.persist(request3);
 
         entityManager.flush();

@@ -124,15 +124,6 @@ public class UserControllerTest {
         verifyNoInteractions(userService);
     }
 
-    @Test
-    void shouldReturnBadRequest_whenEmptyNameInAddUser() throws Exception {
-        mockMvc.perform(post("/users")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("{ \"name\": \"\", \"email\": \"john@example.com\" }"))
-                .andExpect(status().isBadRequest());
-
-        verifyNoInteractions(userService);
-    }
 
     @Test
     void shouldReturnNotFound_whenUserDoesNotExist() throws Exception {

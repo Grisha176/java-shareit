@@ -15,7 +15,6 @@ public class UpdateItemRequest {
     private String description;
     private Boolean available;
     private Long ownerId;
-    //private String request;
 
 
     public boolean hasName() {

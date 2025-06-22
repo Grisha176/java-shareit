@@ -25,7 +25,7 @@ public class ItemRequest {
     @Column(name = "requestor_id")
     private Long requestorId;
     @Column(name = "created_time")
-    private LocalDateTime createdTime = LocalDateTime.now();
+    private LocalDateTime createdTime;
     @OneToMany(mappedBy = "request")
     List<Item> items;
 
